@@ -67,7 +67,7 @@ Formularios: etiquetas arriba y visibles, pista debajo, error al salir del campo
 - Solo `transform`, `opacity` y `clip-path` (lo que la GPU compone sin recalcular el diseño). Nada de animar `left`, `width` o `height`.
 - Entrada a la app: `EntryCurtain` (el panel de tinta del login cubre la pantalla, saluda por nombre y se cierra en el logo de la barra lateral). Una vez por inicio de sesión.
 - Cada pantalla se arma sola: los bloques de la página suben en orden (`.page-enter`) y las tarjetas de Hoy con `.rise-in` y retraso en línea. Cifras grandes con `CountUp`.
-- Portada: vive en su propio repo y sitio (`bria-landing`, GitHub Pages), no en esta app. Sus enlaces llegan a `/login` y a `/login?modo=registro` (abre el registro); el logo del login vuelve a ella (`NEXT_PUBLIC_LANDING_URL`).
+- Portada: vive en su propio repo y sitio (`bria-landing`, en Vercel), no en esta app. Sus enlaces llegan a `/login` y a `/login?modo=registro` (abre el registro); el logo del login vuelve a ella (`NEXT_PUBLIC_LANDING_URL`).
 - Login: tres escenas que se turnan en cada visita (`features/auth/scenes`): «vitrina» (estantes y una boleta que se cobra), «caja» (un escáner que cobra producto por producto) y «pronóstico» (las ventas y el pronóstico se dibujan solos). Todas con los íconos propios (`components/brand/ShopIcons.tsx`).
 - En todo el sistema: filas de tabla en cascada, contenido de pestañas que sube, estados vacíos con ícono flotante, cifras que cuentan (`AnimatedFigure`), gráficos que se dibujan y, en la caja, el check de «Cobrado» con el ticket que sale de la impresora.
 - Pronóstico: `ForecastRace` muestra los métodos reales que compara el motor; la carrera es ilustrativa y lo dice.
