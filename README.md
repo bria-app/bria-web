@@ -85,7 +85,7 @@ La guía de diseño, de lenguaje y de código está en [`docs/DESIGN.md`](docs/D
 
 ## Despliegue
 
-Va en Vercel y detecta Next.js solo: define `NEXT_PUBLIC_API_BASE_URL` y despliega. También puede ir en Railway con `railway.json` y `Dockerfile.prod`. La guía completa está en [`bria-local/docs/DESPLIEGUE.md`](https://github.com/bria-app/bria-local/blob/main/docs/DESPLIEGUE.md).
+Va en Vercel y detecta Next.js solo: define `NEXT_PUBLIC_API_BASE_URL` y despliega. En producción, `NEXT_PUBLIC_LANDING_URL` apunta a la página pública, https://bria-app.vercel.app. También puede ir en Railway con `railway.json` y `Dockerfile.prod`. La guía completa está en [`bria-local/docs/DESPLIEGUE.md`](https://github.com/bria-app/bria-local/blob/main/docs/DESPLIEGUE.md).
 
 ## Seguridad
 
