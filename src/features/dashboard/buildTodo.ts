@@ -14,6 +14,23 @@ const PRIORITY_PILL: Record<RecommendationPriority, Pick<TodoItem, "pill" | "ton
 const purchaseHref = (productId: string, qty?: number) =>
   `/purchases/new?product=${productId}${qty ? `&cantidad=${qty}` : ""}`;
 
+/** Same defaults as the backend's reorder policy (recommendations/domain/services.py). */
+const DEFAULT_LEAD_TIME_DAYS = 7;
+const REVIEW_DAYS = 30;
+
+/**
+ * Units to order when no forecast suggestion is pending for the product: the backend's
+ * order-up-to rule (cover the supplier's wait plus a month, plus the minimum) with the
+ * last 30 days of sales as the daily pace. Without sales it brings the stock back to the
+ * minimum. Never less than 1, so an urgent product always says how much to buy.
+ */
+export function restockQuantity(p: InventoryOverviewItem): number {
+  const lead = p.lead_time_days > 0 ? p.lead_time_days : DEFAULT_LEAD_TIME_DAYS;
+  const daily = Math.max(0, p.units_sold_30d) / 30;
+  const target = Math.max(daily * (lead + REVIEW_DAYS) + p.safety_stock, p.safety_stock, p.reorder_point);
+  return Math.max(1, Math.ceil(target - Math.max(0, p.stock_on_hand)));
+}
+
 const leadNote = (p: InventoryOverviewItem) =>
   p.lead_time_days > 0 ? ` Tarda ${p.lead_time_days} ${p.lead_time_days === 1 ? "día" : "días"} en llegar.` : "";
 
@@ -51,13 +68,20 @@ export function buildTodo(
     .filter((p) => p.status === "sin_stock" || p.status === "critico")
     .sort((a, b) => (a.status === b.status ? (a.coverage_days ?? 0) - (b.coverage_days ?? 0) : a.status === "sin_stock" ? -1 : 1))
     .map<TodoItem>((p) => {
-      const qty = recByProduct.get(p.id)?.recommended_quantity;
+      // The forecast's pending suggestion wins; without one, the same rule with the sales pace.
+      const suggested = recByProduct.get(p.id)?.recommended_quantity;
+      const qty = suggested && suggested > 0 ? suggested : restockQuantity(p);
+      const basis = suggested && suggested > 0
+        ? ""
+        : p.units_sold_30d > 0
+          ? " Cantidad según tus ventas de 30 días."
+          : " Cantidad para volver a tu mínimo.";
       return {
         id: `stock:${p.id}`,
         pill: p.status === "sin_stock" ? "Agotado" : "Por acabarse",
         tone: p.status === "sin_stock" ? "danger" : "warning",
-        title: qty ? `Pide ${units(qty)} de ${p.name}` : `Repón ${p.name}`,
-        why: stockWhy(p),
+        title: `Pide ${units(qty)} de ${p.name}`,
+        why: `${stockWhy(p)}${basis}`,
         productHref: `/inventory/${p.id}`,
         cta: { label: "Registrar compra", href: purchaseHref(p.id, qty) },
       };
