@@ -76,7 +76,18 @@ export default function SalesPage() {
 
         {companyId &&
           (tab === "imported" && !isSeller ? (
-            <ImportedHistory companyId={companyId} refreshKey={imports} />
+            <ImportedHistory
+              companyId={companyId}
+              refreshKey={imports}
+              onImport={
+                isAdmin
+                  ? () => {
+                      setImportLoaded(true);
+                      setImportOpen(true);
+                    }
+                  : undefined
+              }
+            />
           ) : (
             <OrdersView companyId={companyId} isSeller={isSeller} canFilterSeller={isAdmin} refreshKey={imports} initialSellerId={sellerParam} />
           ))}

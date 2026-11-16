@@ -20,7 +20,8 @@ import {
 const SAMPLES_PAST = 96;
 const SAMPLES_FUTURE = 36;
 const MORPH_MS = 480;
-export const READ_MS = 900;
+/** How long «Leyendo tus ventas» stays: long enough to be read, even when the engine answers at once. */
+export const READ_MS = 1800;
 const STEP_MS = 420;
 /** The rehearsal plays at least this long: one whole pass, even if the engine answers first. */
 const MIN_REHEARSAL_MS = READ_MS + STEP_MS * 6;

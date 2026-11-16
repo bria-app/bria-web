@@ -35,6 +35,7 @@ export default function CheckoutPage() {
 
   const premium = plans.data?.find((p) => p.id === "premium");
   const errors = paymentErrors(payment);
+  const incomplete = Object.keys(errors).length > 0;
   const currentEnd = plan.subscription?.current_period_end ? toDate(plan.subscription.current_period_end) : null;
   const extending = plan.isPremium && currentEnd !== null && currentEnd.getTime() > now;
   const until = addCycle(extending && currentEnd ? currentEnd : new Date(now), cycle);
@@ -75,6 +76,9 @@ export default function CheckoutPage() {
               <form id="checkout-form" onSubmit={pay} noValidate className="flex flex-col gap-5 rounded-2xl border border-border bg-surface p-5 sm:p-6">
                 <h2 className="font-display text-lg font-bold">Forma de pago</h2>
                 <PaymentFields value={payment} onChange={setPayment} errors={submitted ? errors : {}} />
+                {incomplete && isAdmin && (
+                  <p className="text-[13px] text-text-muted">Completa la forma de pago para habilitar «Activar Premium».</p>
+                )}
                 {!isAdmin && (
                   <p className="rounded-xl bg-warning-soft px-4 py-3 text-sm text-warning">Solo el dueño o un administrador puede activar Premium.</p>
                 )}
@@ -87,7 +91,7 @@ export default function CheckoutPage() {
                 until={until}
                 extending={extending}
                 sending={sending}
-                disabled={!isAdmin || !companyId}
+                disabled={!isAdmin || !companyId || incomplete}
               />
             </div>
           )}

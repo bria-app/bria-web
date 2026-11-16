@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FileSpreadsheet } from "lucide-react";
+import { FileSpreadsheet, Upload } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { DataState } from "@/components/ui/DataState";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -19,7 +19,7 @@ const TH = "whitespace-nowrap px-3 py-3 text-[12px] font-semibold text-text-mute
  * demo seed, exists only as lines without a sale order, so it does not show up in the «Ventas» tab.
  * Each line brings its product's name and code, so the catalog is not downloaded here.
  */
-export function ImportedHistory({ companyId, refreshKey }: { companyId: string; refreshKey: number }) {
+export function ImportedHistory({ companyId, refreshKey, onImport }: { companyId: string; refreshKey: number; onImport?: () => void }) {
   const sales = useInfiniteList(
     (page) => salesApi.list(companyId, page, PAGE_SIZE, "imported").then((items) => ({ items, hasMore: items.length === PAGE_SIZE })),
     (s) => s.id,
@@ -39,13 +39,21 @@ export function ImportedHistory({ companyId, refreshKey }: { companyId: string; 
           icon={FileSpreadsheet}
           title="Aún no cargaste ventas pasadas"
           description="Si llevabas tus ventas en Excel u otro sistema, súbelas con «Importar ventas». Ayudan a que el pronóstico salga mejor."
+          action={onImport ? { label: "Importar ventas", onClick: onImport } : undefined}
         />
       }
     >
       <Card className="overflow-clip p-0">
-        <p className="border-b border-border px-5 py-3 text-[13px] text-text-secondary">
-          Líneas de venta que cargaste desde un archivo, una por producto.
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-3">
+          <p className="text-[13px] text-text-secondary">
+            Ventas que cargaste desde un archivo, una línea por producto. Aquí no aparecen las ventas de caja: esas están en la pestaña «Ventas».
+          </p>
+          {onImport && (
+            <button type="button" onClick={onImport} className="btn btn-secondary h-9 shrink-0 gap-1.5 px-3 text-[13px]">
+              <Upload aria-hidden className="h-4 w-4" /> Importar ventas
+            </button>
+          )}
+        </div>
         <div className="relative overflow-x-auto">
           <table className="w-full border-collapse text-left">
             <thead className="bg-surface-soft">
