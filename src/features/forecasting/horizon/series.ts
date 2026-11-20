@@ -51,6 +51,17 @@ export function pendingLabels(lastPast: string | undefined, periods: number): st
 /** Periods a horizon in days takes on the monthly axis. */
 export const horizonPeriods = (days: number) => Math.max(1, Math.round(days / 30));
 
+/**
+ * Share of the chart's width the future takes, from how many months it covers. It grows with every
+ * horizon on offer (1, 2, 3, 6, 12 and 24 months), so choosing a longer one visibly widens the zone,
+ * whatever the length of the past beside it. Narrow screens get a floor so a single month stays readable.
+ */
+export function zoneShare(months: number, narrow = false): number {
+  const m = Math.max(1, months);
+  const share = Math.min(0.62, 0.18 + 0.1 * Math.log2(m + 1));
+  return narrow ? Math.max(0.3, share) : share;
+}
+
 /** Real monthly sales of a scope, added up, without the month in progress (it would read as a fall). */
 export function seriesFromPreview(products: PreviewProduct[], asOf: string | null | undefined): HorizonSeries {
   const counted = products.some((p) => p.included) ? products.filter((p) => p.included) : products;

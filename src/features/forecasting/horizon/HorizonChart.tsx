@@ -11,6 +11,7 @@ import {
   originsOf,
   pendingLabels,
   tangents,
+  zoneShare,
   type Attempt,
   type HorizonPoint,
   type HorizonSeries,
@@ -76,7 +77,8 @@ function dense(vals: number[], x0: number, x1: number): string {
   return d;
 }
 
-function buildLayout(past: HorizonPoint[], future: HorizonPoint[], pending: number, w: number, h: number): Layout | null {
+/** perMonth: periods of the series in one month (1 when monthly, about 4.3 when weekly). */
+function buildLayout(past: HorizonPoint[], future: HorizonPoint[], pending: number, w: number, h: number, perMonth = 1): Layout | null {
   if (past.length === 0 || w < 40 || h < 40) return null;
   const narrow = w < 520;
   const left = narrow ? 40 : 52;
@@ -85,8 +87,10 @@ function buildLayout(past: HorizonPoint[], future: HorizonPoint[], pending: numb
   const base = h - 26;
   const P = past.length;
   const F = future.length || pending;
-  // The future gets a share of the width of its own: a single month beside 24 would be a sliver.
-  const share = Math.min(0.5, Math.max(narrow ? 0.3 : 0.24, F / (P + F)));
+  // The future's width follows the horizon asked for, not the length of the past: with 24 months
+  // behind, 1, 3 or 6 months ahead would all be squeezed to the same sliver otherwise.
+  const months = future.length ? future.length / perMonth : pending;
+  const share = zoneShare(months, narrow);
   const xHoy = right - share * (right - left);
 
   const lastPast = past[P - 1].value;
@@ -237,7 +241,9 @@ export function HorizonChart({
 
   const layout = useMemo(() => {
     if (pass) return buildLayout(pass.points, [], pendingPeriods, size.w, size.h);
-    return rest ? buildLayout(rest.past, rest.future, rest.future.length ? 0 : pendingPeriods, size.w, size.h) : null;
+    return rest
+      ? buildLayout(rest.past, rest.future, rest.future.length ? 0 : pendingPeriods, size.w, size.h, rest.frequency === "weekly" ? 52 / 12 : 1)
+      : null;
   }, [pass, rest, pendingPeriods, size.w, size.h]);
 
   useEffect(() => {
